@@ -1,7 +1,34 @@
-﻿#include <stdio.h>
+﻿#include "irc_header.h"
 
-int main(void)
+#define MAX_TEXT_LEN 1000
+
+void inputUserID();
+void sendMsg(char text[MAX_TEXT_LEN]);
+void getMsg();
+void tossMSG();
+
+char userID[1001];
+
+int main(int argc, char* argv[])
 {
-    printf("Hello, World!\n");
-    return 0;
+
+}
+
+void inputUserID()
+{
+
+}
+
+void sendMsg(char text[MAX_TEXT_LEN])
+{
+
+}
+void getMsg()
+{
+
+}
+
+void tossMSG()
+{
+
 }

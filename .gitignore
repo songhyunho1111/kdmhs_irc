@@ -178,6 +178,7 @@ fabric.properties
 
 .idea/
 .vs/
+test.cpp
 
 # Local History for Visual Studio Code
 .history/

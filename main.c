@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
         }
 
     // getMsg 스레드 생성
-    hThread = CreateThread(NULL,0,getMsg,&id,0,&threadId);
+    hThread = CreateThread(NULL, 0, getMsg, (LPVOID)&sock, 0,&threadId);
 
     if (hThread == NULL)
     {
@@ -77,17 +77,49 @@ void inputUserID()
 
 void sendMsg(SOCKET sock)
 {
+
     char text[MAX_TEXT_LEN];
 
-    fgets(text, MAX_TEXT_LEN, stdin);
+    while (1)
+    {
+        if (fgets(text, MAX_TEXT_LEN, stdin) == NULL)
+            break;
 
-    text[strcspn(text, "\r\n")] = '\0';
-
-    send(sock, text, strlen(text), 0);
+        send(sock, text, strlen(text), 0);
+    }
 }
 
 DWORD WINAPI getMsg(LPVOID lpParam)
 {
+    SOCKET sock = *((SOCKET*)lpParam);
+
+    char buffer[MAX_TEXT_LEN + 1];
+    int recvLen;
+
+    while (1)
+    {
+        recvLen = recv(sock, buffer, MAX_TEXT_LEN, 0);
+
+        // 연결 종료
+        if (recvLen == 0)
+        {
+            printf("서버와 연결이 종료되었습니다.\n");
+            break;
+        }
+
+        // 에러
+        if (recvLen == SOCKET_ERROR)
+        {
+            printf("수신 오류\n");
+            break;
+        }
+
+        buffer[recvLen] = '\0';
+
+        printf("%s\n", buffer);
+    }
+
+    closesocket(sock);
 
     return 0;
 }

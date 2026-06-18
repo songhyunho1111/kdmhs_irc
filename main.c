@@ -13,7 +13,6 @@ void broadcastMsg(const char* msg, SOCKET sender);
 void trimNewline(char* str);
 DWORD WINAPI clientThread(LPVOID lpParam);
 
-
 #define MAX_CLIENT 10
 
 typedef struct ClientInfo {
@@ -76,7 +75,9 @@ int main(int argc, char* argv[])
         WSACleanup();
 
         return 1;
-        }
+    }
+
+    send(sock, userID, strlen(userID), 0);
 
     // getMsg 스레드 생성
     hThread = CreateThread(NULL, 0, getMsg, (LPVOID)(uintptr_t)sock, 0, &threadId);
@@ -94,6 +95,7 @@ void inputUserID()
 {
     fgets(userID, 100, stdin);
     userID[strcspn(userID, "\n")] = '\0';
+
 }
 
 void sendMsg(SOCKET sock)

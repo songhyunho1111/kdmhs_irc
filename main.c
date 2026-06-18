@@ -91,10 +91,22 @@ int main(int argc, char* argv[])
     sendMsg(sock);
 }
 
-void inputUserID()
+void inputUserID(char* ID       )
 {
+<<<<<<< Updated upstream
     fgets(userID, 100, stdin);
     userID[strcspn(userID, "\n")] = '\0';
+=======
+    char ID[100]; // length - 입력할수있는 배열 길이?
+
+    printf("채팅에서 사용할 ID를 입력하세요 (최대 20글자): ");
+
+    if(fgets(ID, sizeof(ID), stdin) != NULL){
+        
+    }
+
+    ID[strcspn(ID, "\n")]='\0';
+>>>>>>> Stashed changes
 
 }
 

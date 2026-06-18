@@ -66,18 +66,21 @@ int main(int argc, char* argv[])
         }
 
     // getMsg 스레드 생성
-    hThread = CreateThread(NULL, 0, getMsg, (LPVOID)&sock, 0,&threadId);
+    hThread = CreateThread(NULL, 0, getMsg, (LPVOID)(uintptr_t)sock, 0, &threadId);
 
     if (hThread == NULL)
     {
         printf("스레드 생성 실패\n");
         return 0;
     }
+
+    sendMsg(sock);
 }
 
 void inputUserID()
 {
-
+    fgets(userID, 100, stdin);
+    userID[strcspn(userID, "\n")] = '\0';
 }
 
 void sendMsg(SOCKET sock)
@@ -95,7 +98,7 @@ void sendMsg(SOCKET sock)
 
 DWORD WINAPI getMsg(LPVOID lpParam)
 {
-    SOCKET sock = *((SOCKET*)lpParam);
+    SOCKET sock = (SOCKET)(uintptr_t)lpParam;
 
     char buffer[MAX_TEXT_LEN + 1];
     int recvLen;

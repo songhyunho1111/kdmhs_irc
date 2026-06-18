@@ -13,6 +13,9 @@ char userID[1001];
 
 int main(int argc, char* argv[])
 {
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+
     // ID 입력
     inputUserID();
 

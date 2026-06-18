@@ -3,24 +3,19 @@
 #define MAX_TEXT_LEN 1000
 #define SOCKET_PORT 12345
 #define SOCKET_IP "127.0.0.1"
-
-void inputUserID();
-void sendMsg(SOCKET sock);
-DWORD WINAPI getMsg(LPVOID lpParam);
-void tossMSG();
-void removeClient(int index);
-void broadcastMsg(const char* msg, SOCKET sender);
-void trimNewline(char* str);
-DWORD WINAPI clientThread(LPVOID lpParam);
-
 #define MAX_CLIENT 10
 
+// 구조체
 typedef struct ClientInfo {
     SOCKET sock;
     char id[1001];
     int active;
 } ClientInfo;
 
+// 전역 변수
+HANDLE g_consoleMutex;
+char g_inputBuf[MAX_TEXT_LEN] = {0};
+int  g_inputLen = 0;
 ClientInfo clients[MAX_CLIENT];
 char userID[1001];
 
@@ -44,7 +39,8 @@ int main(int argc, char* argv[])
     WSADATA wsa;
 
     // Winsock 초기화
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+    {
         printf("WSAStartup 실패\n");
         return 1;
     }
@@ -52,7 +48,8 @@ int main(int argc, char* argv[])
     // 클라이언트 소켓 생성
     SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-    if (sock == INVALID_SOCKET) {
+    if (sock == INVALID_SOCKET)
+    {
         printf("소켓 생성 실패\n");
         WSACleanup();
         return 1;
@@ -67,7 +64,8 @@ int main(int argc, char* argv[])
     inet_pton(AF_INET, SOCKET_IP, &serverAddr.sin_addr);
 
     // 서버 접속
-    if (connect(sock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+    if (connect(sock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+    {
 
         printf("서버 접속 실패\n");
 
@@ -93,57 +91,106 @@ int main(int argc, char* argv[])
 
 void inputUserID()
 {
-
 }
 
 void sendMsg(SOCKET sock)
 {
-
-    char text[MAX_TEXT_LEN];
+    printf("> ");
+    fflush(stdout);
 
     while (1)
     {
-        if (fgets(text, MAX_TEXT_LEN, stdin) == NULL) break;
+        int ch = _getch();
 
-        send(sock, text, strlen(text), 0);
+        WaitForSingleObject(g_consoleMutex, INFINITE);
+
+        if (ch == '\r' || ch == '\n')  // Enter
+        {
+            if (g_inputLen == 0)
+            {
+                ReleaseMutex(g_consoleMutex);
+                continue;
+            }
+            g_inputBuf[g_inputLen] = '\n';
+            g_inputBuf[g_inputLen + 1] = '\0';
+
+            printf("\n");
+
+            send(sock, g_inputBuf, g_inputLen + 1, 0);
+
+            g_inputLen = 0;
+            g_inputBuf[0] = '\0';
+            printf("> ");
+            fflush(stdout);
+        }
+        else if (ch == '\b')
+        {
+            if (g_inputLen > 0)
+            {
+                g_inputLen--;
+                g_inputBuf[g_inputLen] = '\0';
+                redrawInput();
+            }
+        }
+        else if (ch >= 32 && g_inputLen < MAX_TEXT_LEN - 2)
+        {
+            g_inputBuf[g_inputLen++] = (char)ch;
+            g_inputBuf[g_inputLen] = '\0';
+            redrawInput();
+        }
+
+        ReleaseMutex(g_consoleMutex);
     }
 }
 
 DWORD WINAPI getMsg(LPVOID lpParam)
 {
     SOCKET sock = (SOCKET)(uintptr_t)lpParam;
-
     char buffer[MAX_TEXT_LEN + 1];
     int recvLen;
 
     while (1)
     {
         recvLen = recv(sock, buffer, MAX_TEXT_LEN, 0);
-
-        // 연결 종료
-        if (recvLen == 0)
-        {
-            printf("서버와 연결이 종료되었습니다.\n");
-            break;
-        }
-
-        // 에러
-        if (recvLen == SOCKET_ERROR)
-        {
-            printf("수신 오류\n");
-            break;
-        }
-
+        if (recvLen <= 0) break;
         buffer[recvLen] = '\0';
 
-        printf(buffer);
+        WaitForSingleObject(g_consoleMutex, INFINITE);
+
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        GetConsoleScreenBufferInfo(hOut, &csbi);
+        COORD pos = { 0, csbi.dwCursorPosition.Y };
+        DWORD written;
+        FillConsoleOutputCharacter(hOut, ' ', csbi.dwSize.X, pos, &written);
+        SetConsoleCursorPosition(hOut, pos);
+
+        printf("%s", buffer);
+        redrawInput();
+
+        ReleaseMutex(g_consoleMutex);
     }
 
     closesocket(sock);
-
     return 0;
 }
 
+void redrawInput() {
+    // 커서를 현재 줄 맨 앞으로
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(hOut, &csbi);
+
+    COORD pos = { 0, csbi.dwCursorPosition.Y };
+    SetConsoleCursorPosition(hOut, pos);
+
+    DWORD written;
+    FillConsoleOutputCharacter(hOut, ' ', csbi.dwSize.X, pos, &written);
+    SetConsoleCursorPosition(hOut, pos);
+
+    printf("> %.*s", g_inputLen, g_inputBuf);
+    fflush(stdout);
+}
 
 
 

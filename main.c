@@ -93,6 +93,7 @@ int main(int argc, char* argv[])
 
 void inputUserID(char* ID       )
 {
+<<<<<<< HEAD
 <<<<<<< Updated upstream
     fgets(userID, 100, stdin);
     userID[strcspn(userID, "\n")] = '\0';
@@ -108,6 +109,8 @@ void inputUserID(char* ID       )
     ID[strcspn(ID, "\n")]='\0';
 >>>>>>> Stashed changes
 
+=======
+>>>>>>> d4c775fc2fe101d2ae1dfdae185df38179c32444
 }
 
 void sendMsg(SOCKET sock)

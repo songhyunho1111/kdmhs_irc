@@ -93,9 +93,6 @@ int main(int argc, char* argv[])
 
 void inputUserID()
 {
-    fgets(userID, 100, stdin);
-    userID[strcspn(userID, "\n")] = '\0';
-
 }
 
 void sendMsg(SOCKET sock)

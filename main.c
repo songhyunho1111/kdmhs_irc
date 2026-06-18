@@ -1,6 +1,8 @@
 ﻿#include "irc_header.h"
 
 #define MAX_TEXT_LEN 1000
+#define SOCKET_PORT 12345
+#define SOCKET_IP "127.0.0.1"
 
 void inputUserID();
 void sendMsg(SOCKET sock);
@@ -14,7 +16,11 @@ int main(int argc, char* argv[])
     // ID 입력
     inputUserID();
 
-    if (strcmp(userID, "server")==0) tossMSG();
+    if (strcmp(userID, "server")==0)
+    {
+        tossMSG();
+        return 0;
+    }
 
     HANDLE hThread;
     DWORD threadId;
@@ -40,17 +46,13 @@ int main(int argc, char* argv[])
     // 서버 주소 설정
     struct sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(12345);
+    serverAddr.sin_port = htons(SOCKET_PORT);
 
     // 서버 IP
-    inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr);
+    inet_pton(AF_INET, SOCKET_IP, &serverAddr.sin_addr);
 
     // 서버 접속
-    if (connect(
-            sock,
-            (struct sockaddr*)&serverAddr,
-            sizeof(serverAddr)
-        ) == SOCKET_ERROR) {
+    if (connect(sock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
 
         printf("서버 접속 실패\n");
 
@@ -82,8 +84,7 @@ void sendMsg(SOCKET sock)
 
     while (1)
     {
-        if (fgets(text, MAX_TEXT_LEN, stdin) == NULL)
-            break;
+        if (fgets(text, MAX_TEXT_LEN, stdin) == NULL) break;
 
         send(sock, text, strlen(text), 0);
     }
@@ -116,7 +117,7 @@ DWORD WINAPI getMsg(LPVOID lpParam)
 
         buffer[recvLen] = '\0';
 
-        printf("%s\n", buffer);
+        puts(buffer);
     }
 
     closesocket(sock);

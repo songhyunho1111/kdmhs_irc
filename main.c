@@ -35,7 +35,6 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-
     // 클라이언트 소켓 생성
     WSADATA wsa;
 
@@ -88,6 +87,8 @@ int main(int argc, char* argv[])
 
     sendMsg(sock);
 }
+
+/* client */
 
 void inputUserID()
 {
@@ -197,6 +198,8 @@ void redrawInput()
     printf("> %.*s", g_inputLen, g_inputBuf);
     fflush(stdout);
 }
+
+/* server */
 
 void tossMSG()
 {

@@ -1,4 +1,4 @@
-#include "irc_header.h"
+﻿#include "irc_header.h"
 
 #define MAX_TEXT_LEN 1000
 #define SOCKET_PORT 12345
@@ -39,17 +39,15 @@ int main(int argc, char* argv[])
     WSADATA wsa;
 
     // Winsock 초기화
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-    {
-        printf("WSAStartup 실패\n");
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
+        printf("\033[31mWSAStartup 실패\033[31m\n");
         return 1;
     }
 
     SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-    if (sock == INVALID_SOCKET)
-    {
-        printf("소켓 생성 실패\n");
+    if (sock == INVALID_SOCKET) {
+        printf("\033[31m소켓 생성 실패\033[31m\n");
         WSACleanup();
         return 1;
     }
@@ -62,9 +60,9 @@ int main(int argc, char* argv[])
     inet_pton(AF_INET, SOCKET_IP, &serverAddr.sin_addr);
 
     // 서버 접속
-    if (connect(sock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
-    {
-        printf("서버 접속 실패\n");
+    if (connect(sock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+
+        printf("\033[31m서버 접속 실패\033[31m\n");
 
         closesocket(sock);
         WSACleanup();
@@ -81,7 +79,7 @@ int main(int argc, char* argv[])
 
     if (hThread == NULL)
     {
-        printf("스레드 생성 실패\n");
+        printf("\033[31m스레드 생성 실패\033[31m\n");
         return 0;
     }
 
@@ -92,6 +90,22 @@ int main(int argc, char* argv[])
 
 void inputUserID()
 {
+    printf("\033[36m████  ███ █   █ ███    ███ ████   ███\033[36m\n");
+    printf("\033[36m█   █  █  ██ ██  █      █  █   █ █   \033[36m\n");
+    printf("\033[36m█   █  █  █ █ █  █      █  ████  █   \033[36m\n");
+    printf("\033[36m█   █  █  █   █  █      █  █  █  █   \033[36m\n");
+    printf("\033[36m████  ███ █   █ ███    ███ █   █  ███\033[36m\n");
+    printf("\n\n");
+
+    
+    printf("\033[33m사용할 ID 입력 (최대 20글자): \033[33m");
+ 
+    fgets(userID, sizeof(userID), stdin);
+
+    userID[strcspn(userID, "\n")]='\0';
+
+
+
 }
 
 void sendMsg(SOCKET sock)
@@ -157,7 +171,21 @@ DWORD WINAPI getMsg(LPVOID lpParam)
     while (true)
     {
         recvLen = recv(sock, buffer, MAX_TEXT_LEN, 0);
-        if (recvLen <= 0) break;
+
+        // 연결 종료
+        if (recvLen == 0)
+        {
+            printf("\033[31m서버와 연결이 종료되었습니다.\033[31m\n");
+            break;
+        }
+
+        // 에러
+        if (recvLen == SOCKET_ERROR)
+        {
+            printf("\033[31m수신 오류\033[31m\n");
+            break;
+        }
+
         buffer[recvLen] = '\0';
 
         WaitForSingleObject(g_consoleMutex, INFINITE); // mutex
@@ -207,7 +235,7 @@ void tossMSG()
 
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
     {
-        printf("WSAStartup 실패\n");
+        printf("\033[31mWSAStartup 실패\033[31m\n");
         return;
     }
 
@@ -223,7 +251,7 @@ void tossMSG()
 
     if (server == INVALID_SOCKET)
     {
-        printf("서버 소켓 생성 실패\n");
+        printf("\033[31m서버 소켓 생성 실패\033[31m\n");
         WSACleanup();
         return;
     }
@@ -235,7 +263,7 @@ void tossMSG()
 
     if (bind(server, (struct sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR)
     {
-        printf("bind 실패\n");
+        printf("\033[31mbind 실패\033[31m\n");
         closesocket(server);
         WSACleanup();
         return;
@@ -243,13 +271,13 @@ void tossMSG()
 
     if (listen(server, 5) == SOCKET_ERROR)
     {
-        printf("listen 실패\n");
+        printf("\033[31mlisten 실패\033[31m\n");
         closesocket(server);
         WSACleanup();
         return;
     }
 
-    printf("IRC 서버 실행 중. 포트: %d\n", SOCKET_PORT);
+    printf("\033[33mIRC 서버 실행 중. 포트: \033[33m%d\n", SOCKET_PORT);
 
     while (true)
     {
@@ -260,7 +288,7 @@ void tossMSG()
 
         if (client == INVALID_SOCKET)
         {
-            printf("accept 실패\n");
+            printf("\033[31maccept 실패\033[31m\n");
             continue;
         }
 
@@ -297,7 +325,7 @@ void tossMSG()
 
         if (hThread == NULL)
         {
-            printf("클라이언트 스레드 생성 실패\n");
+            printf("\033[31m클라이언트 스레드 생성 실패\033[31m\n");
             removeClient(index);
             continue;
         }

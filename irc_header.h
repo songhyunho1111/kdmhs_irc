@@ -11,3 +11,15 @@
 #include <string.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <conio.h>
+
+/* 함수 원형 */
+void sendMsg(SOCKET sock);
+DWORD WINAPI getMsg(LPVOID lpParam);
+void tossMSG();
+void removeClient(int index);
+void broadcastMsg(const char* msg, SOCKET sender);
+void trimNewline(char* str);
+DWORD WINAPI clientThread(LPVOID lpParam);
+void redrawInput();
+void inputUserID();

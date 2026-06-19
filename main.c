@@ -6,7 +6,8 @@
 #define MAX_CLIENT 10
 
 // 구조체
-typedef struct ClientInfo {
+typedef struct ClientInfo
+{
     SOCKET sock;
     char id[1001];
     int active;
@@ -25,15 +26,15 @@ int main(int argc, char* argv[])
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
 
-    // user id 입력부
-    inputUserID();
-
     // 서버 체크
-    if (strcmp(userID, "server")==0)
+    if (argc >= 2 && strcmp(argv[1], "--server") == 0)
     {
         tossMSG();
         return 0;
     }
+
+    // user id 입력부
+    inputUserID();
 
     // 클라이언트 소켓 생성
     WSADATA wsa;

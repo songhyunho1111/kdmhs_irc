@@ -2,7 +2,7 @@
 
 #define MAX_TEXT_LEN 1000
 #define SOCKET_PORT 12345
-#define SOCKET_IP "127.0.0.1"
+#define SOCKET_IP "irc.shh.name"
 #define MAX_CLIENT 10
 
 // 구조체
@@ -41,35 +41,56 @@ int main(int argc, char* argv[])
 
     // Winsock 초기화
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
-        printf("\033[31mWSAStartup 실패\033[31m\n");
+        printf("\033[31mWSAStartup 실패\033[0m\n");
         return 1;
     }
 
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    // 서버 주소 찾기용 구조체
+    struct addrinfo hints;
+    struct addrinfo* result = NULL;
 
-    if (sock == INVALID_SOCKET) {
-        printf("\033[31m소켓 생성 실패\033[31m\n");
+    ZeroMemory(&hints, sizeof(hints));
+
+    hints.ai_family = AF_INET;          // IPv4 사용
+    hints.ai_socktype = SOCK_STREAM;    // TCP
+    hints.ai_protocol = IPPROTO_TCP;
+
+    // 포트 번호를 문자열로 변환
+    char portStr[16];
+    sprintf_s(portStr, sizeof(portStr), "%d", SOCKET_PORT);
+
+    // 도메인 또는 IP 주소를 실제 주소로 변환
+    if (getaddrinfo(SOCKET_IP, portStr, &hints, &result) != 0) {
+        printf("\033[31m서버 주소 변환 실패\033[0m\n");
         WSACleanup();
         return 1;
     }
 
-    // 서버 주소 설정
-    struct sockaddr_in serverAddr;
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(SOCKET_PORT);
+    // 소켓 생성
+    SOCKET sock = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
-    inet_pton(AF_INET, SOCKET_IP, &serverAddr.sin_addr);
+    if (sock == INVALID_SOCKET) {
+        printf("\033[31m소켓 생성 실패\033[0m\n");
+
+        freeaddrinfo(result);
+        WSACleanup();
+
+        return 1;
+    }
 
     // 서버 접속
-    if (connect(sock, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+    if (connect(sock, result->ai_addr, (int)result->ai_addrlen) == SOCKET_ERROR) {
+        printf("\033[31m서버 접속 실패\033[0m\n");
 
-        printf("\033[31m서버 접속 실패\033[31m\n");
-
+        freeaddrinfo(result);
         closesocket(sock);
         WSACleanup();
 
         return 1;
     }
+
+    // 주소 정보 해제
+    freeaddrinfo(result);
 
     // getMsg 스레드 생성
     HANDLE hThread;

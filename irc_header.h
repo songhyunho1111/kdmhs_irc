@@ -2,6 +2,7 @@
 #pragma once
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <ws2tcpip.h>
 
 /* 스레드 헤더 */
 #include <windows.h>
@@ -12,6 +13,8 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <conio.h>
+
+#pragma comment(lib, "ws2_32.lib")
 
 /* 함수 원형 */
 void sendMsg(SOCKET sock);

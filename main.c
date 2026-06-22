@@ -414,7 +414,7 @@ DWORD WINAPI clientThread(LPVOID lpParam)
         snprintf(
             msg,
             sizeof(msg),
-            "[%s] %s",
+            "%s: %s",
             clients[index].id,
             buffer
         );

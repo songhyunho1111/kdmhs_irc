@@ -110,6 +110,19 @@ int main(int argc, char* argv[])
 
 /* client */
 
+int isValid(const char* str) {
+    if (strlen(str) == 0) return 0;
+
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (!isalnum((unsigned char)str[i])) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+
 void inputUserID()
 {
     printf("\x1b[36m████  ███ █   █ ███    ███ ████   ███\x1b[0m\n");
@@ -126,6 +139,16 @@ void inputUserID()
 
     userID[strcspn(userID, "\n")]='\0';
 
+     if (strcmp(userID,"server")==0||strcmp(userID,"client")==0||strcmp(userID,"Server")==0||strcmp(userID,"Client")==0)
+     {
+         system("cls");
+         printf("server, client와 같은 단어를 사용자 ID로 사용 할 수 없습니다.\n");
+         inputUserID();
+     }
+
+    if (!isValid(userID)) inputUserID();
+
+    system("cls");
 }
 
 void sendMsg(SOCKET sock)

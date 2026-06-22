@@ -185,7 +185,7 @@ void sendMsg(SOCKET sock)
             g_inputBuf[0] = '\0';
 
             redrawInput();
-            printf("\b\b\x1b[37m[%s] %s\x1b[0m", userID, tmp);
+            printf("\b\b\x1b[37m%s: %s\x1b[0m", userID, tmp);
 
             printf("> ");
             fflush(stdout);
@@ -437,7 +437,7 @@ DWORD WINAPI clientThread(LPVOID lpParam)
         snprintf(
             msg,
             sizeof(msg),
-            "[%s] %s",
+            "%s: %s",
             clients[index].id,
             buffer
         );

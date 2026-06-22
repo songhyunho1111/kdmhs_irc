@@ -126,8 +126,6 @@ void inputUserID()
 
     userID[strcspn(userID, "\n")]='\0';
 
-
-
 }
 
 void sendMsg(SOCKET sock)
@@ -155,12 +153,17 @@ void sendMsg(SOCKET sock)
             g_inputBuf[g_inputLen] = '\n';
             g_inputBuf[g_inputLen + 1] = '\0';
 
-            printf("\n");
+            char tmp[g_inputLen+1];
+            strcpy(tmp,g_inputBuf);
 
             send(sock, g_inputBuf, g_inputLen + 1, 0);
 
             g_inputLen = 0;
             g_inputBuf[0] = '\0';
+
+            redrawInput();
+            printf("\b\b\033[37m[%s] %s\033[0m",userID,tmp);
+
             printf("> ");
             fflush(stdout);
         }
@@ -189,6 +192,9 @@ DWORD WINAPI getMsg(LPVOID lpParam)
     SOCKET sock = (SOCKET)(uintptr_t)lpParam;
     char buffer[MAX_TEXT_LEN + 1];
     int recvLen;
+
+    // 본인 입장 메시지 버림
+    recvLen = recv(sock, buffer, MAX_TEXT_LEN, 0);
 
     while (true)
     {
@@ -220,7 +226,7 @@ DWORD WINAPI getMsg(LPVOID lpParam)
         FillConsoleOutputCharacter(hOut, ' ', csbi.dwSize.X, pos, &written);
         SetConsoleCursorPosition(hOut, pos);
 
-        printf("%s", buffer);
+        printf("\033[33m%s\033[0m", buffer);
         redrawInput();
 
         ReleaseMutex(g_consoleMutex);

@@ -282,7 +282,7 @@ void redrawInput()
 }
 
 /* server */
-
+// 서버 메인 함수
 void tossMSG()
 {
     WSADATA wsa;
@@ -391,7 +391,7 @@ void tossMSG()
     WSACleanup();
 }
 
-
+// 클라이언트 처리 쓰레드
 DWORD WINAPI clientThread(LPVOID lpParam)
 {
     int index = (int)(INT_PTR)lpParam;
@@ -459,6 +459,7 @@ DWORD WINAPI clientThread(LPVOID lpParam)
     return 0;
 }
 
+// fget \n 처리
 void trimNewline(char* str)
 {
     int len = strlen(str);
@@ -477,6 +478,7 @@ void trimNewline(char* str)
     }
 }
 
+// 메시지 브로드캐스트
 void broadcastMsg(const char* msg, SOCKET sender)
 {
 
@@ -493,6 +495,7 @@ void broadcastMsg(const char* msg, SOCKET sender)
 
 }
 
+// 클라 목록에서 제거
 void removeClient(int index)
 {
 

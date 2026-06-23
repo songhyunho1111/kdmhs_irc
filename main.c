@@ -3,7 +3,7 @@
 #define MAX_TEXT_LEN 1000
 #define SOCKET_PORT 12345
 #define SOCKET_IP "irc.shh.name"
-#define MAX_CLIENT 10
+#define MAX_CLIENT 40
 
 // 구조체
 typedef struct ClientInfo
@@ -181,6 +181,8 @@ void sendMsg(SOCKET sock)
             char tmp[g_inputLen+1];
             strcpy(tmp,g_inputBuf);
 
+            if (strcmp(g_inputBuf,"/exit\n")==0) exit(0);
+
             send(sock, g_inputBuf, g_inputLen + 1, 0);
 
             g_inputLen = 0;
@@ -285,6 +287,7 @@ void redrawInput()
 // 서버 메인 함수
 void tossMSG()
 {
+    // 소켓 생성
     WSADATA wsa;
 
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
@@ -292,7 +295,6 @@ void tossMSG()
         printf("\x1b[31mWSAStartup 실패\x1b[0m\n");
         return;
     }
-
 
     for (int i = 0; i < MAX_CLIENT; i++)
     {
@@ -338,6 +340,7 @@ void tossMSG()
         struct sockaddr_in clientAddr;
         int clientLen = sizeof(clientAddr);
 
+        // accept 처리
         SOCKET client = accept(server, (struct sockaddr*)&clientAddr, &clientLen);
 
         if (client == INVALID_SOCKET)
@@ -346,6 +349,7 @@ void tossMSG()
             continue;
         }
 
+        // 클라이언트 입장 처리
         int index = -1;
 
         for (int i = 0; i < MAX_CLIENT; i++)
@@ -368,6 +372,7 @@ void tossMSG()
             continue;
         }
 
+        // 클라이언트 처리용 쓰레드 생성
         HANDLE hThread = CreateThread(
             NULL,
             0,
@@ -401,6 +406,7 @@ DWORD WINAPI clientThread(LPVOID lpParam)
     char buffer[MAX_TEXT_LEN + 1];
     char msg[MAX_TEXT_LEN + 1200];
 
+    // 입장 처리
     int recvLen;
 
     recvLen = recv(clientSock, buffer, MAX_TEXT_LEN, 0);
@@ -421,6 +427,7 @@ DWORD WINAPI clientThread(LPVOID lpParam)
     printf("%s", msg);
     broadcastMsg(msg, INVALID_SOCKET);
 
+    // 메시지 클라에서 받아오기
     while (true)
     {
         recvLen = recv(clientSock, buffer, MAX_TEXT_LEN, 0);
@@ -437,13 +444,7 @@ DWORD WINAPI clientThread(LPVOID lpParam)
 
         buffer[recvLen] = '\0';
 
-        snprintf(
-            msg,
-            sizeof(msg),
-            "%s: %s",
-            clients[index].id,
-            buffer
-        );
+        snprintf( msg, sizeof(msg), "%s: %s", clients[index].id, buffer);
 
         printf("%s", msg);
 
@@ -481,7 +482,6 @@ void trimNewline(char* str)
 // 메시지 브로드캐스트
 void broadcastMsg(const char* msg, SOCKET sender)
 {
-
     for (int i = 0; i < MAX_CLIENT; i++)
     {
         if (clients[i].active && clients[i].sock != INVALID_SOCKET)
@@ -492,7 +492,6 @@ void broadcastMsg(const char* msg, SOCKET sender)
             }
         }
     }
-
 }
 
 // 클라 목록에서 제거

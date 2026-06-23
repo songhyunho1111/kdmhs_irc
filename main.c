@@ -110,6 +110,7 @@ int main(int argc, char* argv[])
 
 /* client */
 
+// userID 패턴 체크
 int isValid(const char* str) {
     if (strlen(str) == 0) return 0;
 
@@ -122,7 +123,7 @@ int isValid(const char* str) {
     return 1;
 }
 
-
+// userID 입력부
 void inputUserID()
 {
     printf("\x1b[36m████  ███ █   █ ███    ███ ████   ███\x1b[0m\n");
@@ -139,7 +140,7 @@ void inputUserID()
 
     userID[strcspn(userID, "\n")]='\0';
 
-     if (strcmp(userID,"server")==0||strcmp(userID,"client")==0||strcmp(userID,"Server")==0||strcmp(userID,"Client")==0)
+     if (strcmp(userID,"server")==0 || strcmp(userID,"client")==0 || strcmp(userID,"Server")==0 || strcmp(userID,"Client")==0)
      {
          system("cls");
          printf("server, client와 같은 단어를 사용자 ID로 사용 할 수 없습니다.\n");
@@ -151,6 +152,7 @@ void inputUserID()
     system("cls");
 }
 
+// 메시지 전송
 void sendMsg(SOCKET sock)
 {
     // userID 전달
@@ -185,7 +187,7 @@ void sendMsg(SOCKET sock)
             g_inputBuf[0] = '\0';
 
             redrawInput();
-            printf("\b\b\x1b[37m%s: %s\x1b[0m", userID, tmp);
+            printf("\b\b\x1b[37m%s: %s\x1b[0m", userID, tmp); // 본인 메시지 출력
 
             printf("> ");
             fflush(stdout);
@@ -210,6 +212,7 @@ void sendMsg(SOCKET sock)
     }
 }
 
+// 메시지 받아오기
 DWORD WINAPI getMsg(LPVOID lpParam)
 {
     SOCKET sock = (SOCKET)(uintptr_t)lpParam;
@@ -217,7 +220,7 @@ DWORD WINAPI getMsg(LPVOID lpParam)
     int recvLen;
 
     // 본인 입장 메시지 버림
-    recvLen = recv(sock, buffer, MAX_TEXT_LEN, 0);
+    recv(sock, buffer, MAX_TEXT_LEN, 0);
 
     while (true)
     {
@@ -259,9 +262,9 @@ DWORD WINAPI getMsg(LPVOID lpParam)
     return 0;
 }
 
+// 커서 제어
 void redrawInput()
 {
-
     // 커서를 현재 줄 맨 앞으로
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -502,4 +505,3 @@ void removeClient(int index)
     }
 
 }
-

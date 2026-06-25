@@ -95,7 +95,6 @@ int main(int argc, char* argv[])
     // getMsg 스레드 생성
     HANDLE hThread;
     DWORD threadId;
-    int id = 1;
 
     hThread = CreateThread(NULL, 0, getMsg, (LPVOID)(uintptr_t)sock, 0, &threadId);
 
@@ -147,7 +146,11 @@ void inputUserID()
          inputUserID();
      }
 
-    if (!isValid(userID)) inputUserID();
+    if (!isValid(userID))
+    {
+        printf(" id는 영어, 숫자만 사용 할 수 있습니다.\n");
+        inputUserID();
+    }
 
     system("cls");
 }
@@ -156,7 +159,7 @@ void inputUserID()
 void sendMsg(SOCKET sock)
 {
     // userID 전달
-    send(sock, userID, strlen(userID), 0);
+    send(sock, userID, (int)strlen(userID), 0);
 
     printf("> ");
     fflush(stdout);
@@ -367,7 +370,7 @@ void tossMSG()
         if (index == -1)
         {
             char* fullMsg = "서버 인원이 가득 찼습니다.\n";
-            send(client, fullMsg, strlen(fullMsg), 0);
+            send(client, fullMsg, (int)strlen(fullMsg), 0);
             closesocket(client);
             continue;
         }
@@ -391,9 +394,6 @@ void tossMSG()
 
         CloseHandle(hThread);
     }
-
-    closesocket(server);
-    WSACleanup();
 }
 
 // 클라이언트 처리 쓰레드
@@ -432,15 +432,8 @@ DWORD WINAPI clientThread(LPVOID lpParam)
     {
         recvLen = recv(clientSock, buffer, MAX_TEXT_LEN, 0);
 
-        if (recvLen == 0)
-        {
-            break;
-        }
-
-        if (recvLen == SOCKET_ERROR)
-        {
-            break;
-        }
+        if (recvLen == 0) break;
+        if (recvLen == SOCKET_ERROR) break;
 
         buffer[recvLen] = '\0';
 
@@ -463,7 +456,7 @@ DWORD WINAPI clientThread(LPVOID lpParam)
 // fget \n 처리
 void trimNewline(char* str)
 {
-    int len = strlen(str);
+    int len = (int)strlen(str);
 
     while (len > 0)
     {
@@ -472,10 +465,7 @@ void trimNewline(char* str)
             str[len - 1] = '\0';
             len--;
         }
-        else
-        {
-            break;
-        }
+        else break;
     }
 }
 
@@ -488,7 +478,7 @@ void broadcastMsg(const char* msg, SOCKET sender)
         {
             if (clients[i].sock != sender)
             {
-                send(clients[i].sock, msg, strlen(msg), 0);
+                send(clients[i].sock, msg, (int)strlen(msg), 0);
             }
         }
     }

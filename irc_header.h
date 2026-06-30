@@ -2,7 +2,6 @@
 #pragma once
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <ws2tcpip.h>
 
 /* 스레드 헤더 */
 #include <windows.h>
